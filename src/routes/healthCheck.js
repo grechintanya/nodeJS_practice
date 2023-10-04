@@ -15,7 +15,11 @@ router.get('/', (req, res) => {
  *      description: This api is used to check server health
  *      responses: 
  *        200:
- *          description: Server is running       
+ *          description: Server is running
+ *        404:
+ *          description: Page not found
+ *        500:
+ *          description: Internal server error
  */
 
 module.exports = router;
