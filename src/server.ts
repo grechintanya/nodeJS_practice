@@ -1,32 +1,33 @@
 import express, { NextFunction, Request, Response } from 'express';
-import path from 'path';
+import swaggerUi from 'swagger-ui-express';
+import mongoose from 'mongoose';
+
+import connectDB from './config/DBconnect';
+import swaggerSpec from './swaggerSpec';
+
 import healthCheckRouter from './routes/healthCheck';
+import genresRouter from './routes/genres';
+import moviesRouter from './routes/movies';
 
 const app = express();
-const port: Number = 3000;
+const port: String | Number = process.env.PORT || 3000;
 
-import swaggerDoc from 'swagger-jsdoc';
-import swaggerUi from 'swagger-ui-express';
+connectDB();
 
-const options = {
-  definition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'NodeJS Practice',
-      version: '1.0.0',
-    },
-  },
-  apis: [`${path.join(__dirname, 'routes')}/*.ts`, 'server.ts'],
-};
-
-const swaggerSpec = swaggerDoc(options);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Server is running');
 });
 
 app.use('/health-check', healthCheckRouter);
+
+app.use('/genres', genresRouter);
+
+app.use('/movies', moviesRouter);
 
 app.get('/*', (req: Request, res: Response) => {
   res.sendStatus(404);
@@ -37,6 +38,9 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   res.status(500).send('Something went wrong');
 });
 
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+mongoose.connection.once('open', () => {
+  console.log('Connected to MongoDB');
+  app.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
+  });
 });
