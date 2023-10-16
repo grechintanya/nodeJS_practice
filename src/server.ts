@@ -1,12 +1,11 @@
 import express, { NextFunction, Request, Response } from 'express';
+import swaggerDoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
 import path from 'path';
 import healthCheckRouter from './routes/healthCheck';
 
 const app = express();
 const port: Number = 3000;
-
-import swaggerDoc from 'swagger-jsdoc';
-import swaggerUi from 'swagger-ui-express';
 
 const options = {
   definition: {
