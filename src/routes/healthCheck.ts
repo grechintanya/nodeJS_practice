@@ -1,19 +1,19 @@
-const express = require('express');
-const router = express.Router();
+import { Request, Response, Router } from 'express';
+const router = Router();
 
-router.get('/', (req, res) => {
-  res.json({ status: "Server is running" });
+router.get('/', (req: Request, res: Response) => {
+  res.json({ status: 'Server is running' });
 });
 
 /**
  * @swagger
  * /health-check:
- *    get: 
- *      tags: 
+ *    get:
+ *      tags:
  *        - health
  *      summary: Server health check
  *      description: This api is used to check server health
- *      responses: 
+ *      responses:
  *        200:
  *          description: Server is running
  *        404:
@@ -22,4 +22,4 @@ router.get('/', (req, res) => {
  *          description: Internal server error
  */
 
-module.exports = router;
+export default router;
