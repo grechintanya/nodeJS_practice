@@ -1,8 +1,6 @@
 import { Request, Response } from 'express';
-import { validationResult } from 'express-validator';
 
-import Genre from '../models/Genre';
-import { GenreObj } from '../models/interfaces';
+import { Genre, GenreObj } from '../models';
 import { errorHandler } from '../middleware/errorHandlers';
 
 export const getAllGenres = async (req: Request, res: Response) => {
@@ -18,7 +16,7 @@ export const createGenre = async (req: Request, res: Response) => {
     const savedGenre: GenreObj = await Genre.create(req.body);
     res.status(201).json({ genre: savedGenre });
   } catch (err) {
-    errorHandler(err as Error, req, res);
+    errorHandler(err as Error, res);
   }
 };
 
@@ -28,11 +26,11 @@ export const updateGenre = async (req: Request, res: Response) => {
     const updatedGenre = req.body;
     const result = await Genre.updateOne({ _id: id }, updatedGenre);
     if (!result.matchedCount) {
-      return res.status(400).json({ message: 'Genre not found' });
+      return res.status(404).json({ message: 'Genre not found' });
     }
     res.status(200).json({ message: `Genre with id ${id} was updated` });
   } catch (err) {
-    errorHandler(err as Error, req, res);
+    errorHandler(err as Error, res);
   }
 };
 
@@ -41,10 +39,10 @@ export const deleteGenre = async (req: Request, res: Response) => {
     const id = req.params.id;
     const result = await Genre.deleteOne({ _id: id });
     if (!result.deletedCount) {
-      return res.status(400).json({ message: 'Genre not found' });
+      return res.status(404).json({ message: 'Genre not found' });
     }
     res.status(200).json({ message: `Genre with id ${id} was deleted` });
   } catch (err) {
-    errorHandler(err as Error, req, res);
+    errorHandler(err as Error, res);
   }
 };

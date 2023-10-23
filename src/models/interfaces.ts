@@ -10,5 +10,5 @@ export interface MovieObj {
   title: String;
   description: String;
   releaseDate: Date;
-  genres: GenreObj[];
+  genres: ObjectId[];
 }

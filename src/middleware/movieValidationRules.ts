@@ -1,4 +1,4 @@
-import { body, param } from 'express-validator';
+import { body, param, ValidationChain } from 'express-validator';
 
 export const movieCreateValidationRules = [
   body('title').trim().notEmpty().withMessage('Title is required'),
@@ -9,12 +9,11 @@ export const movieCreateValidationRules = [
   body('genres').isMongoId().withMessage('Invalid genres'),
 ];
 
-export const movieUpdateValidationRules = [
+export const movieUpdateValidationRules: ValidationChain[] = [
   param('id').trim().isHexadecimal().isLength({ min: 24, max: 24 }).withMessage('Invalid ID'),
-  body('releaseDate').isDate().withMessage('Invalid release date'),
-  body('genres').isMongoId().withMessage('Invalid genres'),
+  ...movieCreateValidationRules,
 ];
 
-export const movieDeleteValidationRules = [
+export const movieDeleteValidationRules: ValidationChain[] = [
   param('id').trim().isHexadecimal().isLength({ min: 24, max: 24 }).withMessage('Invalid ID'),
 ];
