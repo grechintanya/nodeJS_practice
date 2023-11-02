@@ -8,7 +8,7 @@ export const getAllGenres = async (req: Request, res: Response) => {
   if (!genres.length) {
     return res.sendStatus(204);
   }
-  res.json(genres);
+  res.status(200).json(genres);
 };
 
 export const createGenre = async (req: Request, res: Response) => {
