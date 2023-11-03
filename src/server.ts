@@ -1,6 +1,7 @@
-import express, { NextFunction, Request, Response } from 'express';
+import express, { Request, Response } from 'express';
 import swaggerUi from 'swagger-ui-express';
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 
 import connectDB from './config/DBconnect';
 import swaggerSpec from './swaggerSpec';
@@ -8,9 +9,11 @@ import swaggerSpec from './swaggerSpec';
 import healthCheckRouter from './routes/healthCheck';
 import genresRouter from './routes/genres';
 import moviesRouter from './routes/movies';
+import { errorHandler } from './middleware/errorHandlers';
 
+dotenv.config();
 const app = express();
-const port: String | Number = process.env.PORT || 3000;
+const port: string | number = process.env.PORT || 3000;
 
 connectDB();
 
@@ -29,13 +32,10 @@ app.use('/genres', genresRouter);
 
 app.use('/movies', moviesRouter);
 
+app.use(errorHandler);
+
 app.get('/*', (req: Request, res: Response) => {
   res.sendStatus(404);
-});
-
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  console.error(err.stack);
-  res.status(500).send('Something went wrong');
 });
 
 mongoose.connection.once('open', () => {

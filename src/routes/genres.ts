@@ -27,8 +27,6 @@ export default router;
  *            application/json:
  *              schema:
  *                $ref: '#/components/schemas/ArrayOfGenre'
- *        204:
- *          description: Genres not found
  *        500:
  *          $ref: '#/components/responses/ServerError'
  *    post:

@@ -1,11 +1,11 @@
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 
-const DATABASE_URI =
-  'mongodb+srv://grechintanya:s4uPPS8Cr1nkcAg7@cluster0.lawdgoc.mongodb.net/?retryWrites=true&w=majority';
+dotenv.config();
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(DATABASE_URI);
+    await mongoose.connect(process.env.DATABASE_URI as string);
   } catch (err) {
     console.log(err);
   }
