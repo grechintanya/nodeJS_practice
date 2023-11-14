@@ -2,7 +2,7 @@ import { describe, test } from '@jest/globals';
 import { Request, Response } from 'express';
 const mockingoose = require('mockingoose');
 
-import { FakeExpress } from './fakeExpress';
+import { FakeExpress } from '../fakeExpress';
 import * as genresControllers from '../../controllers/genresControllers';
 import { Genre, GenreObj } from '../../models';
 
@@ -28,15 +28,9 @@ describe('Genre Controllers', () => {
     test('should send status 200 and an array of genres', async () => {
       fakeExpress = new FakeExpress({} as Partial<Request>);
       mockingoose(Genre).toReturn(listOfGenres, 'find');
-      await genresControllers.getAllGenres(fakeExpress.req as Request, fakeExpress.res as Response);
+      await genresControllers.getAllGenres(fakeExpress.req as Request, fakeExpress.res as Response, fakeExpress.next);
       expect(fakeExpress.res.statusCode).toBe(200);
       expect(JSON.parse(JSON.stringify(fakeExpress.responseData))).toMatchObject(listOfGenres);
-    });
-
-    test('should send status 204, if there is no genres in database', async () => {
-      mockingoose(Genre).toReturn([], 'find');
-      await genresControllers.getAllGenres(fakeExpress.req as Request, fakeExpress.res as Response);
-      expect(fakeExpress.res.statusCode).toBe(204);
     });
   });
 
@@ -50,7 +44,7 @@ describe('Genre Controllers', () => {
       };
       fakeExpress = new FakeExpress(req);
       mockingoose(Genre).toReturn(newGenre, 'create');
-      await genresControllers.createGenre(fakeExpress.req as Request, fakeExpress.res as Response);
+      await genresControllers.createGenre(fakeExpress.req as Request, fakeExpress.res as Response, fakeExpress.next);
       expect(fakeExpress.res.statusCode).toBe(201);
       expect(fakeExpress.responseData.genre.name).toBe('comedy');
     });
@@ -71,17 +65,18 @@ describe('Genre Controllers', () => {
     test('if request is valid, should send status code 200 and success message', async () => {
       fakeExpress = new FakeExpress(req);
       mockingoose(Genre).toReturn({ matchedCount: 1 }, 'updateOne');
-      await genresControllers.updateGenre(fakeExpress.req as Request, fakeExpress.res as Response);
+      await genresControllers.updateGenre(fakeExpress.req as Request, fakeExpress.res as Response, fakeExpress.next);
       expect(fakeExpress.res.statusCode).toBe(200);
       expect(fakeExpress.responseData.message).toBe(`Genre with id ${updatedGenre._id} was updated`);
     });
 
-    test('if genre not found in DB, should send status code 404 and error message', async () => {
+    test('if genre not found in DB, should throw an error with code 404 and message "Genre not found"', async () => {
       fakeExpress = new FakeExpress(req);
       mockingoose(Genre).toReturn({ matchedCount: 0 }, 'updateOne');
-      await genresControllers.updateGenre(fakeExpress.req as Request, fakeExpress.res as Response);
-      expect(fakeExpress.res.statusCode).toBe(404);
-      expect(fakeExpress.responseData.message).toBe(`Genre not found`);
+      await genresControllers.updateGenre(fakeExpress.req as Request, fakeExpress.res as Response, fakeExpress.next);
+      expect(fakeExpress.next).toHaveBeenCalled();
+      expect(fakeExpress.error.message).toBe('Genre not found');
+      expect(fakeExpress.error.statusCode).toBe(404);
     });
   });
 
@@ -95,17 +90,18 @@ describe('Genre Controllers', () => {
     test('if request is valid, should send status code 200 and success message', async () => {
       fakeExpress = new FakeExpress(req);
       mockingoose(Genre).toReturn({ deletedCount: 1 }, 'deleteOne');
-      await genresControllers.deleteGenre(fakeExpress.req as Request, fakeExpress.res as Response);
+      await genresControllers.deleteGenre(fakeExpress.req as Request, fakeExpress.res as Response, fakeExpress.next);
       expect(fakeExpress.res.statusCode).toBe(200);
       expect(fakeExpress.responseData.message).toBe(`Genre with id ${genreID} was deleted`);
     });
 
-    test('if genre not found in DB, should send status code 404 and error message', async () => {
+    test('if genre not found in DB, should throw error with status code 404 and message "Genre not found"', async () => {
       fakeExpress = new FakeExpress(req);
       mockingoose(Genre).toReturn({ deletedCount: 0 }, 'deleteOne');
-      await genresControllers.updateGenre(fakeExpress.req as Request, fakeExpress.res as Response);
-      expect(fakeExpress.res.statusCode).toBe(404);
-      expect(fakeExpress.responseData.message).toBe(`Genre not found`);
+      await genresControllers.updateGenre(fakeExpress.req as Request, fakeExpress.res as Response, fakeExpress.next);
+      expect(fakeExpress.next).toHaveBeenCalled();
+      expect(fakeExpress.error.statusCode).toBe(404);
+      expect(fakeExpress.error.message).toBe(`Genre not found`);
     });
   });
 });

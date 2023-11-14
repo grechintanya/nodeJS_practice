@@ -2,13 +2,25 @@ import { Router } from 'express';
 
 import * as genresControllers from '../controllers/genresControllers';
 import * as genreValidationRules from '../middleware/genreValidationRules';
-import { requestValidator } from '../middleware/requestValidator';
+import createRequestValidator from '../middleware/requestValidator';
 
 const router = Router();
 router.get('/', genresControllers.getAllGenres);
-router.post('/', requestValidator(genreValidationRules.genreCreateValidationRules), genresControllers.createGenre);
-router.patch('/:id', requestValidator(genreValidationRules.genreUpdateValidationRules), genresControllers.updateGenre);
-router.delete('/:id', requestValidator(genreValidationRules.genreDeleteValidationRules), genresControllers.deleteGenre);
+router.post(
+  '/',
+  createRequestValidator(genreValidationRules.genreCreateValidationRules),
+  genresControllers.createGenre,
+);
+router.patch(
+  '/:id',
+  createRequestValidator(genreValidationRules.genreUpdateValidationRules),
+  genresControllers.updateGenre,
+);
+router.delete(
+  '/:id',
+  createRequestValidator(genreValidationRules.genreDeleteValidationRules),
+  genresControllers.deleteGenre,
+);
 
 export default router;
 

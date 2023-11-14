@@ -1,15 +1,23 @@
 import { Router } from 'express';
 import * as movieControllers from '../controllers/moviesControllers';
 import * as movieValidationRules from '../middleware/movieValidationRules';
-import { requestValidator } from '../middleware/requestValidator';
+import createRequestValidator from '../middleware/requestValidator';
 
 const router = Router();
 
 router.get('/', movieControllers.getAllMovies);
 router.get('/genre/:genreName', movieControllers.getMoviesByGenre);
-router.post('/', requestValidator(movieValidationRules.movieCreateValidationRules), movieControllers.createMovie);
-router.patch('/:id', requestValidator(movieValidationRules.movieUpdateValidationRules), movieControllers.updateMovie);
-router.delete('/:id', requestValidator(movieValidationRules.movieDeleteValidationRules), movieControllers.deleteMovie);
+router.post('/', createRequestValidator(movieValidationRules.movieCreateValidationRules), movieControllers.createMovie);
+router.patch(
+  '/:id',
+  createRequestValidator(movieValidationRules.movieUpdateValidationRules),
+  movieControllers.updateMovie,
+);
+router.delete(
+  '/:id',
+  createRequestValidator(movieValidationRules.movieDeleteValidationRules),
+  movieControllers.deleteMovie,
+);
 
 export default router;
 

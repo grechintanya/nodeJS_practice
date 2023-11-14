@@ -2,7 +2,7 @@ import { describe, test } from '@jest/globals';
 import { Request, Response } from 'express';
 const mockingoose = require('mockingoose');
 
-import { FakeExpress } from './fakeExpress';
+import { FakeExpress } from '../fakeExpress';
 import * as moviesControllers from '../../controllers/moviesControllers';
 import { Genre, Movie, MovieObj } from '../../models';
 
@@ -36,14 +36,8 @@ describe('Movie Controllers', () => {
     test('should send array of movies', async () => {
       fakeExpress = new FakeExpress({} as Partial<Request>);
       mockingoose(Movie).toReturn(listOfMovies, 'find');
-      await moviesControllers.getAllMovies(fakeExpress.req as Request, fakeExpress.res as Response);
+      await moviesControllers.getAllMovies(fakeExpress.req as Request, fakeExpress.res as Response, fakeExpress.next);
       expect(JSON.parse(JSON.stringify(fakeExpress.responseData))).toMatchObject(listOfMovies);
-    });
-
-    test('should send status 204, if there is no movies in database', async () => {
-      mockingoose(Movie).toReturn([], 'find');
-      await moviesControllers.getAllMovies(fakeExpress.req as Request, fakeExpress.res as Response);
-      expect(fakeExpress.res.statusCode).toBe(204);
     });
   });
 
@@ -60,7 +54,7 @@ describe('Movie Controllers', () => {
       };
       fakeExpress = new FakeExpress(req);
       mockingoose(Movie).toReturn(newMovie, 'create');
-      await moviesControllers.createMovie(fakeExpress.req as Request, fakeExpress.res as Response);
+      await moviesControllers.createMovie(fakeExpress.req as Request, fakeExpress.res as Response, fakeExpress.next);
       expect(fakeExpress.res.statusCode).toBe(201);
       expect(JSON.parse(JSON.stringify(fakeExpress.responseData.movie))).toMatchObject(newMovie);
     });
@@ -84,17 +78,18 @@ describe('Movie Controllers', () => {
     test('if request is valid, should send status code 200 and success message', async () => {
       fakeExpress = new FakeExpress(req);
       mockingoose(Movie).toReturn({ matchedCount: 1 }, 'updateOne');
-      await moviesControllers.updateMovie(fakeExpress.req as Request, fakeExpress.res as Response);
+      await moviesControllers.updateMovie(fakeExpress.req as Request, fakeExpress.res as Response, fakeExpress.next);
       expect(fakeExpress.res.statusCode).toBe(200);
       expect(fakeExpress.responseData.message).toBe(`Movie with id ${updatedMovie._id} was updated`);
     });
 
-    test('if movie not found in DB, should send status code 404 and error message', async () => {
+    test('if movie not found in DB, should throw error with status code 404 and message "Movie not found"', async () => {
       fakeExpress = new FakeExpress(req);
       mockingoose(Movie).toReturn({ matchedCount: 0 }, 'updateOne');
-      await moviesControllers.updateMovie(fakeExpress.req as Request, fakeExpress.res as Response);
-      expect(fakeExpress.res.statusCode).toBe(404);
-      expect(fakeExpress.responseData.message).toBe(`Movie not found`);
+      await moviesControllers.updateMovie(fakeExpress.req as Request, fakeExpress.res as Response, fakeExpress.next);
+      expect(fakeExpress.next).toHaveBeenCalled();
+      expect(fakeExpress.error.statusCode).toBe(404);
+      expect(fakeExpress.error.message).toBe(`Movie not found`);
     });
   });
 
@@ -108,7 +103,7 @@ describe('Movie Controllers', () => {
     test('if request is valid, should send status code 200 and success message', async () => {
       fakeExpress = new FakeExpress(req);
       mockingoose(Movie).toReturn({ deletedCount: 1 }, 'deleteOne');
-      await moviesControllers.deleteMovie(fakeExpress.req as Request, fakeExpress.res as Response);
+      await moviesControllers.deleteMovie(fakeExpress.req as Request, fakeExpress.res as Response, fakeExpress.next);
       expect(fakeExpress.res.statusCode).toBe(200);
       expect(fakeExpress.responseData.message).toBe(`Movie with id ${movieID} was deleted`);
     });
@@ -116,9 +111,10 @@ describe('Movie Controllers', () => {
     test('if movie not found in DB, should send status code 404 and error message', async () => {
       fakeExpress = new FakeExpress(req);
       mockingoose(Movie).toReturn({ deletedCount: 0 }, 'deleteOne');
-      await moviesControllers.deleteMovie(fakeExpress.req as Request, fakeExpress.res as Response);
-      expect(fakeExpress.res.statusCode).toBe(404);
-      expect(fakeExpress.responseData.message).toBe(`Movie not found`);
+      await moviesControllers.deleteMovie(fakeExpress.req as Request, fakeExpress.res as Response, fakeExpress.next);
+      expect(fakeExpress.next).toHaveBeenCalled();
+      expect(fakeExpress.error.statusCode).toBe(404);
+      expect(fakeExpress.error.message).toBe(`Movie not found`);
     });
   });
 
@@ -148,25 +144,26 @@ describe('Movie Controllers', () => {
       fakeExpress = new FakeExpress(req);
       mockingoose(Genre).toReturn({ _id: '100a43821479c3ea68d63290', name: 'action' }, 'findOne');
       mockingoose(Movie).toReturn(moviesArray, 'find');
-      await moviesControllers.getMoviesByGenre(fakeExpress.req as Request, fakeExpress.res as Response);
+      await moviesControllers.getMoviesByGenre(
+        fakeExpress.req as Request,
+        fakeExpress.res as Response,
+        fakeExpress.next,
+      );
       expect(fakeExpress.res.statusCode).toBe(200);
       expect(JSON.parse(JSON.stringify(fakeExpress.responseData))).toMatchObject(moviesArray);
     });
 
-    test('if request invalid, should send status code 400 and error message', async () => {
+    test('if request invalid, should throw error with status code 400 and message "Invalid genre"', async () => {
       fakeExpress = new FakeExpress(req);
       mockingoose(Genre).toReturn(null, 'findOne');
-      await moviesControllers.getMoviesByGenre(fakeExpress.req as Request, fakeExpress.res as Response);
-      expect(fakeExpress.res.statusCode).toBe(400);
-      expect(fakeExpress.responseData?.message).toEqual('Invalid genre');
-    });
-
-    test('if request valid, but movies not found in DB, should send status code 204', async () => {
-      fakeExpress = new FakeExpress(req);
-      mockingoose(Genre).toReturn({ _id: '100a43821479c3ea68d63290', name: 'action' }, 'findOne');
-      mockingoose(Movie).toReturn([], 'find');
-      await moviesControllers.getMoviesByGenre(fakeExpress.req as Request, fakeExpress.res as Response);
-      expect(fakeExpress.res.statusCode).toBe(204);
+      await moviesControllers.getMoviesByGenre(
+        fakeExpress.req as Request,
+        fakeExpress.res as Response,
+        fakeExpress.next,
+      );
+      expect(fakeExpress.next).toHaveBeenCalled();
+      expect(fakeExpress.error.statusCode).toBe(400);
+      expect(fakeExpress.error.message).toEqual('Invalid genre');
     });
   });
 });

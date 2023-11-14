@@ -1,4 +1,4 @@
-import { Response, Request } from 'express';
+import { Response, Request, NextFunction } from 'express';
 
 export class FakeExpress {
   constructor(req: Partial<Request>) {
@@ -20,5 +20,10 @@ export class FakeExpress {
     }),
   };
   req: Partial<Request>;
+  next: NextFunction = jest.fn().mockImplementation((err) => {
+    this.error = err;
+  });
+
   responseData: any;
+  error: any;
 }
