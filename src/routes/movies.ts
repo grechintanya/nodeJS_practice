@@ -36,8 +36,6 @@ export default router;
  *            application/json:
  *              schema:
  *                $ref: '#/components/schemas/ArrayOfMovies'
- *        204:
- *          description: movies not found
  *        500:
  *          $ref: '#/components/responses/ServerError'
  *    post:
@@ -133,8 +131,6 @@ export default router;
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ArrayOfMovies'
- *       204:
- *         description: Movies not found
  *       400:
  *         $ref: '#/components/responses/BadRequest'
  *       500:

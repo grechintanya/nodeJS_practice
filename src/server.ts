@@ -13,7 +13,7 @@ import { errorHandler } from './middleware/errorHandlers';
 
 dotenv.config();
 const app = express();
-const port: String | Number = process.env.PORT || 3000;
+const port: string | number = process.env.PORT || 3000;
 
 connectDB();
 
