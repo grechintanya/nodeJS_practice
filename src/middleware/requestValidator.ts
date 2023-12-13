@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { ValidationChain, validationResult } from 'express-validator';
 import { ValidationError } from './errorHandlers';
 
-export const requestValidator = (validations: ValidationChain[]) => {
+const createRequestValidator = (validations: ValidationChain[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       for (let validation of validations) {
@@ -18,3 +18,5 @@ export const requestValidator = (validations: ValidationChain[]) => {
     }
   };
 };
+
+export default createRequestValidator;

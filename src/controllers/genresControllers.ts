@@ -3,9 +3,13 @@ import { NextFunction, Request, Response } from 'express';
 import { Genre, GenreObj } from '../models';
 import { AppError } from '../middleware/errorHandlers';
 
-export const getAllGenres = async (req: Request, res: Response) => {
-  const genres: GenreObj[] = await Genre.find();
-  res.json(genres);
+export const getAllGenres = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const genres: GenreObj[] = await Genre.find();
+    res.json(genres);
+  } catch (err) {
+    next(err);
+  }
 };
 
 export const createGenre = async (req: Request, res: Response, next: NextFunction) => {

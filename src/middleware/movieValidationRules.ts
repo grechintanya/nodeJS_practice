@@ -1,6 +1,6 @@
 import { body, param, ValidationChain } from 'express-validator';
 
-export const movieCreateValidationRules = [
+export const movieCreateValidationRules: ValidationChain[] = [
   body('title').trim().notEmpty().withMessage('Title is required'),
   body('description').trim().notEmpty().withMessage('Description is required'),
   body('releaseDate').trim().notEmpty().withMessage('Release date is required'),
